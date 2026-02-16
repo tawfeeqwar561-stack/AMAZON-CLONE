@@ -656,5 +656,20 @@ const products = [
       "apparel",
       "mens"
     ]
+  },
+   {
+    id: "d1c8e5b7-9c3a-4c0b-9f1e-8a2e5f6b7c8d",
+    image: "images/products/5095_FARE_OkoBrella_mini_green.jpg",
+    name: "FARE OkoBrella Mini Compact Travel Umbrella - Green",
+    rating: {
+      stars: 4.5,
+      count: 150
+    },
+    priceCents: 1999,
+    keywords: [
+      "umbrellas",
+      "accessories",
+      "rain gear"
+    ]
   }
 ];
