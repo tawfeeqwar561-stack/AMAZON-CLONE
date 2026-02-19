@@ -1,4 +1,4 @@
-import { cart, removeFromCart } from '../data/cart.js';
+import { cart, removeFromCart, calculateCartQuantity, updateQuantity } from '../data/cart.js';
 import { products } from '../data/products.js';
 import { formatCurrency } from './utils/money.js';      
 
@@ -13,6 +13,12 @@ cart.forEach((cartItem) => {
             matchingProduct = product;
         }
     });
+    if (!matchingProduct) {
+
+        console.log('Product not found for id:', productId);
+
+        return;
+    }
     cartSummaryHTML += `
 
 <div class="cart-item-container
@@ -31,15 +37,17 @@ cart.forEach((cartItem) => {
         </div>
         <div class="product-price">
             $${formatCurrency(matchingProduct.priceCents)}
-        </div>
-        <div class="product-quantity">
+         <div class="product-quantity  js-cart-item-container-${productId}">
             <span>
             Quantity: <span class="quantity-label">${cartItem.quantity}</span>
             </span>
-            <span class="update-quantity-link link-primary">
+            <span class="update-quantity-link link-primary js-update-link" data-product-id="${productId}">
             Update
             </span>
-            <span class="delete-quantity-link link-primary js-delete-link" data-product-id="${matchingProduct.id}">
+            <input class= "quantity-input">
+            <span class="save-quantity-link link-primary js-save-link " data-product-id="${productId}">
+            Save</span>
+            <span class="delete-quantity-link link-primary js-delete-link" data-product-id="${productId}">
             Delete
             </span>
         </div>
@@ -94,8 +102,18 @@ cart.forEach((cartItem) => {
 `;
 });
 document.querySelector('.js-order-summary').innerHTML = cartSummaryHTML;
+updateCartQuantity();
+attachEventListeners();
 
-document.querySelectorAll('.js-delete-link')
+function updateCartQuantity() {
+
+        document.querySelector('.js-checkout-quantity').innerHTML= calculateCartQuantity();
+  
+    }
+    updateCartQuantity();
+
+ function attachEventListeners() {
+ document.querySelectorAll('.js-delete-link')
 .forEach((link) => {
     link.addEventListener('click', () => {
         const {productId} = link.dataset;
@@ -103,6 +121,67 @@ document.querySelectorAll('.js-delete-link')
         
         const container = document.querySelector(`.js-cart-item-container-${productId}`);
         container.remove();
+        updateCartQuantity();
     });
 
+
     });
+   document.querySelectorAll('.js-update-link')
+  .forEach((link) => {
+    link.addEventListener('click', () => {
+
+      const { productId } = link.dataset;
+
+      const container = document.querySelector(
+        `.js-cart-item-container-${productId}`
+      );
+
+      container.classList.add('is-editing-quantity');
+
+    });
+  });
+
+ document.querySelectorAll('.js-save-link')
+  .forEach((link) => {
+    link.addEventListener('click', () => {
+
+      const { productId } = link.dataset;
+
+      const container = document.querySelector(
+        `.js-cart-item-container-${productId}`
+      );
+
+      const quantityInput = container.querySelector('.quantity-input');
+
+      const newQuantity = Number(quantityInput.value);
+      if (newQuantity < 0 || newQuantity >= 1000 || isNaN(newQuantity)) {
+            alert('Quantity must be between 0 and 999');
+            return;
+            }
+            document.querySelectorAll('.quantity-input')
+        .forEach((input) => {
+            input.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+
+                const container = input.closest('.cart-item-container');
+                const saveButton = container.querySelector('.js-save-link');
+
+                saveButton.click();
+            }
+            });
+  });
+
+
+      updateQuantity(productId, newQuantity);
+
+      container.querySelector('.quantity-label').innerHTML = newQuantity;
+
+      document.querySelector('.js-checkout-quantity').innerHTML = calculateCartQuantity();
+
+      updateCartQuantity();
+
+      container.classList.remove('is-editing-quantity');
+
+    });
+  });
+}
