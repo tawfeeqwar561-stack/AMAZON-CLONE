@@ -7,11 +7,6 @@ import {deliveryOptions, getDeliveryOption} from '../../data/deliveryOptions.js'
 import { renderPaymentSummary } from './paymentSummary.js';
 
 
-hello();
-
-const todayjs = dayjs();
-const deliveryDate = todayjs.add(7, 'day'); 
-console.log(deliveryDate.format('dddd, MMMM D'));
 
  export function renderOrderSummary() {
 
@@ -135,6 +130,7 @@ console.log(deliveryDate.format('dddd, MMMM D'));
             const container = document.querySelector(`.js-cart-item-container-${productId}`);
             container.remove();
             updateCartQuantity();
+            renderPaymentSummary();
         });
 
 
@@ -204,7 +200,9 @@ console.log(deliveryDate.format('dddd, MMMM D'));
                 updateDeliveryOption(productId, deliveryOptionId);
 
                 renderOrderSummary();
+
                 renderPaymentSummary();
+
             });
         });
     }
