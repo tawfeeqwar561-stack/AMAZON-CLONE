@@ -1,9 +1,10 @@
-import { cart, removeFromCart, calculateCartQuantity, updateQuantity, updatedeliveryOption } from '../../data/cart.js';
-import { products } from '../../data/products.js';
+import { cart, removeFromCart, calculateCartQuantity, updateQuantity, updateDeliveryOption } from '../../data/cart.js';
+import { products, getProduct } from '../../data/products.js';
 import { formatCurrency } from '../utils/money.js';      
 import {hello} from 'https://unpkg.com/supersimpledev@1.0.1/hello.esm.js';
 import dayjs from 'https://unpkg.com/supersimpledev@8.5.0/dayjs/esm/index.js';
-import {deliveryOptions} from '../../data/deliveryOptions.js';
+import {deliveryOptions, getDeliveryOption} from '../../data/deliveryOptions.js';
+import { renderPaymentSummary } from './paymentSummary.js';
 
 
 hello();
@@ -18,21 +19,15 @@ console.log(deliveryDate.format('dddd, MMMM D'));
 
     cart.forEach((cartItem) => {
         const productId = cartItem.productId;
-        let matchingProduct;
-        products.forEach((product) => {
-            if (product.id === productId) {
-                matchingProduct = product;
-            }
-        });
-        const deliverOptionId = cartItem.
-        deliverOptionId;
+
+
+        const matchingProduct = getProduct(productId);
+
+        const deliveryOptionId = cartItem.deliveryOptionId;
         
-        let deliveryOption;
-        deliveryOptions.forEach((option) => {
-            if (option.id === deliverOptionId) {
-                deliveryOption = option;
-            }
-        });
+        const deliveryOption = getDeliveryOption(deliveryOptionId);
+
+
         const today = dayjs();
             const deliveryDate = today.add(deliveryOption.deliveryDays, 'days');
             const dateString = deliveryDate.format('dddd, MMMM D');
@@ -56,6 +51,7 @@ console.log(deliveryDate.format('dddd, MMMM D'));
             </div>
             <div class="product-price">
                 $${formatCurrency(matchingProduct.priceCents)}
+            </div>
             <div class="product-quantity  js-cart-item-container-${productId}">
                 <span>
                 Quantity: <span class="quantity-label">${cartItem.quantity}</span>
@@ -82,6 +78,7 @@ console.log(deliveryDate.format('dddd, MMMM D'));
         </div>
     `;
     });
+
     function deliveryOptionHTML(matchingProduct, cartItem) {
         let HTML = '';
         deliveryOptions.forEach((deliveryOption) => {
@@ -91,7 +88,7 @@ console.log(deliveryDate.format('dddd, MMMM D'));
 
             const priceString = deliveryOption.priceCents === 0 ? 'FREE' : `$${formatCurrency(deliveryOption.priceCents)} - Shipping`;
 
-            const isChecked = deliveryOption.id === cartItem.deliverOptionId;
+            const isChecked = deliveryOption.id === cartItem.deliveryOptionId;
 
 
         HTML += `
@@ -204,8 +201,10 @@ console.log(deliveryDate.format('dddd, MMMM D'));
         .forEach((element) => {
             element.addEventListener('click', () => {
                 const { productId, deliveryOptionId } = element.dataset;
-                updatedeliveryOption(productId, deliveryOptionId);
+                updateDeliveryOption(productId, deliveryOptionId);
+
                 renderOrderSummary();
+                renderPaymentSummary();
             });
         });
     }
